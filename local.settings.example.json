@@ -1,0 +1,15 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "Cosmos:ConnectionString": "",
+    "Cosmos:DatabaseName": "skyddsrum",
+    "Cosmos:ArticlesContainerName": "articles",
+    "BlobStorage:ConnectionString": "",
+    "BlobStorage:ImagesContainerName": "images",
+    "Email:ConnectionString": "",
+    "Email:SenderAddress": "",
+    "Email:RecipientAddress": ""
+  }
+}
