@@ -1,38 +1,29 @@
-using Microsoft.Azure.Cosmos;
+using Azure.Communication.Email;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Skyddsrum.Functions.Authentication;
+using Microsoft.Extensions.Options;
 using Skyddsrum.Functions.Email;
-using Skyddsrum.Functions.Repositories;
-using Skyddsrum.Functions.Services;
-using Skyddsrum.Functions.Storage;
+using Skyddsrum.Functions.Security;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
     .ConfigureServices((context, services) =>
     {
-        var configuration = context.Configuration;
+        services
+            .AddOptions<EmailOptions>()
+            .Bind(context.Configuration.GetSection(EmailOptions.SectionName))
+            .Validate(options => !string.IsNullOrWhiteSpace(options.ConnectionString), "Email connection string is required.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.SenderAddress), "Email sender address is required.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.RecipientAddress), "Email recipient address is required.")
+            .ValidateOnStart();
 
-        services.Configure<CosmosOptions>(configuration.GetSection(CosmosOptions.SectionName));
-        services.Configure<BlobStorageOptions>(configuration.GetSection(BlobStorageOptions.SectionName));
-        services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
-
-        services.AddSingleton(_ =>
+        services.AddSingleton(provider =>
         {
-            var connectionString = configuration["Cosmos:ConnectionString"];
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                throw new InvalidOperationException("Missing Cosmos:ConnectionString setting.");
-            }
-
-            return new CosmosClient(connectionString);
+            var options = provider.GetRequiredService<IOptions<EmailOptions>>().Value;
+            return new EmailClient(options.ConnectionString);
         });
 
-        services.AddSingleton<ICurrentUserReader, CurrentUserReader>();
-        services.AddSingleton<IAdminAuthorization, AdminAuthorization>();
-        services.AddSingleton<IArticleRepository, ArticleRepository>();
-        services.AddSingleton<IArticleService, ArticleService>();
-        services.AddSingleton<IBlobStorageService, BlobStorageService>();
+        services.AddSingleton<IContactSubmissionGuard, ContactSubmissionGuard>();
         services.AddSingleton<IEmailSender, CommunicationEmailSender>();
     })
     .Build();

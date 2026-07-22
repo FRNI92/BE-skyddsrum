@@ -7,4 +7,5 @@ public sealed class EmailOptions
     public string? ConnectionString { get; init; }
     public string? SenderAddress { get; init; }
     public string? RecipientAddress { get; init; }
+    public string SiteUrl { get; init; } = "https://www.skyddsrumsgruppen.se";
 }

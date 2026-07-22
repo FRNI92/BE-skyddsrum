@@ -1,29 +1,37 @@
-# Skyddsrum Functions
+# Skyddsrumsgruppen Contact API
 
-Azure Functions backend for Skyddsrumsgruppen.
+Azure Functions-backend för webbplatsens kontaktformulär.
 
-## Local settings
+## Endpoint
 
-Copy `local.settings.example.json` to `local.settings.json` and fill in the values.
+`POST /api/contact`
 
-## Azure settings
+API:t validerar och normaliserar alla fält, begränsar requeststorlek, stoppar dubbletter och täta upprepningar samt använder ett honeypot-fält mot enklare bottar.
 
-Set these application settings in the Azure Functions app:
+Vid godkänt formulär skickas:
 
-- `Cosmos:ConnectionString`
-- `Cosmos:DatabaseName`
-- `Cosmos:ArticlesContainerName`
-- `BlobStorage:ConnectionString`
-- `BlobStorage:ImagesContainerName`
+1. Ett internt mejl med kundens förfrågan och kundens adress som `Reply-To`.
+2. Ett designat bekräftelsemejl till kunden med referensnummer.
+
+## Lokal konfiguration
+
+Kopiera `local.settings.example.json` till `local.settings.json` och fyll i:
+
 - `Email:ConnectionString`
 - `Email:SenderAddress`
 - `Email:RecipientAddress`
+- `Email:SiteUrl`
 
-## Cosmos DB
+`local.settings.json` får inte checkas in.
 
-Create database `skyddsrum` and container `articles` with partition key `/id`.
+## Azure
 
-## Auth
+Lägg samma värden som Application settings i Function App. Tillåt endast webbplatsens produktionsdomäner under CORS.
 
-Admin endpoints require the `admin` role in `x-ms-client-principal`.
-This is easiest when the API is connected to Azure Static Web Apps auth.
+Rate limiting i koden är per Function-instans och skyddar främst mot misstag och enklare spam. Använd Azure Front Door WAF eller API Management om ett distribuerat produktionsskydd krävs.
+
+## Kontroll
+
+```powershell
+dotnet build
+```
