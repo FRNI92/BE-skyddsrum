@@ -32,7 +32,7 @@ public sealed class CommunicationEmailSender(
 
         internalMessage.ReplyTo.Add(new EmailAddress(contactForm.Email!, contactForm.Name));
 
-        await client.SendAsync(WaitUntil.Completed, internalMessage, cancellationToken);
+        await client.SendAsync(WaitUntil.Started, internalMessage, cancellationToken);
 
         var confirmationMessage = new EmailMessage(
             value.SenderAddress!,
@@ -43,7 +43,7 @@ public sealed class CommunicationEmailSender(
                 Html = CreateConfirmationHtml(contactForm, referenceId, value.SiteUrl)
             });
 
-        await client.SendAsync(WaitUntil.Completed, confirmationMessage, cancellationToken);
+        await client.SendAsync(WaitUntil.Started, confirmationMessage, cancellationToken);
     }
 
     private static string CreateInternalPlainText(ContactFormDto form, string referenceId) => $"""
