@@ -17,8 +17,8 @@ public interface IContactSubmissionGuard
 
 public sealed class ContactSubmissionGuard : IContactSubmissionGuard
 {
-    private static readonly TimeSpan DuplicateWindow = TimeSpan.FromMinutes(10);
-    private static readonly TimeSpan RateWindow = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan DuplicateWindow = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan RateWindow = TimeSpan.FromMinutes(1);
     private const int MaxAttemptsPerWindow = 3;
 
     private readonly ConcurrentDictionary<string, DateTimeOffset> submissions = new();
