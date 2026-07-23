@@ -1,7 +1,6 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+# Deploys the backend to the Flex Consumption Function App.
 
-name: Build and deploy dotnet core project to Azure Function App - function-skydd
+name: Deploy backend to function-skydd
 
 on:
   push:
@@ -10,34 +9,33 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '10.0.x' # set this to the dotnet version to use
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: "."
+  DOTNET_VERSION: "10.0.x"
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
-      - name: 'Checkout GitHub Action'
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-        uses: actions/setup-dotnet@v1
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: 'Resolve Project Dependencies Using Dotnet'
+      - name: Publish
         shell: bash
         run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          dotnet build --configuration Release --output ./output
+          pushd "./${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}"
+          dotnet publish Skyddsrum.Functions.csproj --configuration Release --output ./output
           popd
-      
-      - name: 'Run Azure Functions Action'
+
+      - name: Deploy Azure Function
         uses: Azure/functions-action@v1
-        id: fa
         with:
-          app-name: 'function-skydd'
-          slot-name: 'Production'
-          package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+          app-name: "function-skydd"
+          package: "${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output"
+          sku: "flexconsumption"
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8ABB300607AA418683992B2F61F1D537 }}
